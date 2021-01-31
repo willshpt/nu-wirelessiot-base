@@ -34,9 +34,8 @@ static simple_ble_char_t print_state_char = {.uuid16 = 0x1091};
 static bool led_state = false;
 static char print_val = ' ';
 static char button_state = 0;
-bool led_blink_state = false;
-bool led_on = false;
-clock_t t;
+
+
 
 /*******************************************************************************
  *   State for this application
@@ -52,12 +51,11 @@ void ble_evt_write(ble_evt_t const* p_ble_evt) {
 
     // Use value written to control LED
     if (led_state != 0) {
-      printf("Turning on LED blinker!\n");
-      t = nrf_clock();
-      led_blink_state = true;
+      printf("Turning on LED!\n");
+      nrf_gpio_pin_clear(LED1);
     } else {
       printf("Turning off LED!\n");
-      led_blink_state = false;
+      nrf_gpio_pin_set(LED1);
     }
   }
   // Simple print a message!
@@ -103,18 +101,6 @@ int main(void) {
 
   while(1) {
     //power_manage();
-    if (led_blink_state == true){
-      if (((float)(nrf_clock() - t)) > 1){
-        if(led_on){
-          nrf_gpio_pin_clear(LED1);
-          led_on = false;
-        } else {
-          nrf_gpio_pin_set(LED1);
-          led_on = true;
-        }
-        t = clock();
-      }
-    }
     if (!nrf_gpio_pin_read(BUTTON1)) {
       button_state = 1;
       simple_ble_notify_char(&button_state_char);
